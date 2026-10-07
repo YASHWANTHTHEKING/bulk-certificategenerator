@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bulk Certificate Generator - Dashboard</title>
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --primary-hover: #1d4ed8;
+      --accent: #d97706;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --success: #16a34a;
+      --error: #dc2626;
+      --warning: #ca8a04;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding: 24px; }
+    .container { max-width: 1000px; margin: 0 auto; }
+    
+    header { margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+    header h1 { font-size: 24px; color: var(--primary); display: flex; align-items: center; gap: 8px; }
+    header .links a { margin-left: 12px; color: var(--primary); text-decoration: none; font-size: 14px; font-weight: 500; }
+    header .links a:hover { text-decoration: underline; }
+
+    .card { background: var(--card-bg); border-radius: 10px; border: 1px solid var(--border); padding: 24px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .card h2 { font-size: 18px; margin-bottom: 16px; color: var(--text); }
+
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group.full-width { grid-column: span 2; }
+    label { font-size: 13px; font-weight: 600; color: var(--text-muted); }
+    input, textarea { padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; outline: none; }
+    input:focus, textarea:focus { border-color: var(--primary); }
+    textarea { resize: vertical; min-height: 80px; }
+
+    button {
+      background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 6px;
+      font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.15s;
+    }
+    button:hover { background: var(--primary-hover); }
+    button:disabled { background: #94a3b8; cursor: not-allowed; }
+
+    .btn-secondary { background: #e2e8f0; color: var(--text); margin-left: 8px; }
+    .btn-secondary:hover { background: #cbd5e1; }
+    .btn-success { background: var(--success); }
+    .btn-success:hover { background: #15803d; }
+
+    .progress-bar-container { background: #e2e8f0; border-radius: 999px; height: 12px; overflow: hidden; margin: 12px 0; }
+    .progress-bar-fill { background: var(--primary); height: 100%; width: 0%; transition: width 0.3s; }
+
+    .badge { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+    .badge-PENDING { background: #fef3c7; color: #92400e; }
+    .badge-PROCESSING { background: #e0f2fe; color: #0369a1; }
+    .badge-COMPLETED { background: #dcfce7; color: #166534; }
+    .badge-PARTIALLY_COMPLETED { background: #ffedd5; color: #9a3412; }
+    .badge-FAILED { background: #fee2e2; color: #991b1b; }
+    .badge-SUCCESS { background: #dcfce7; color: #166534; }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 14px; }
+    th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+    th { background: #f1f5f9; color: var(--text-muted); font-size: 12px; text-transform: uppercase; font-weight: 600; }
+
+    .recipient-preview { max-height: 200px; overflow-y: auto; }
+    .stats-row { display: flex; gap: 16px; margin-bottom: 16px; }
+    .stat-box { flex: 1; padding: 14px; background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; text-align: center; }
+    .stat-number { font-size: 22px; font-weight: 700; color: var(--primary); }
+    .stat-label { font-size: 12px; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🎓 Bulk Certificate Generator</h1>
+      <div class="links">
+        <a href="/docs" target="_blank">📖 Swagger API Docs</a>
+        <a href="/redoc" target="_blank">📑 ReDoc</a>
+      </div>
+    </header>
+
+    <!-- Certificate Generator Form -->
+    <div class="card">
+      <h2>1. Create Certificate Generation Job</h2>
+      <form id="certForm">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="eventName">Event / Course Name *</label>
+            <input type="text" id="eventName" value="Advanced Python & Cloud Architecture" required />
+          </div>
+          <div class="form-group">
+            <label for="issueDate">Issue Date</label>
+            <input type="text" id="issueDate" placeholder="e.g. 2026-10-07 (default: today)" />
+          </div>
+          <div class="form-group">
+            <label for="issuerName">Issuer Name / Organization *</label>
+            <input type="text" id="issuerName" value="Global Tech Institute" required />
+          </div>
+          <div class="form-group">
+            <label for="issuerTitle">Issuer Title</label>
+            <input type="text" id="issuerTitle" value="Director of Certification" />
+          </div>
+          <div class="form-group full-width">
+            <label for="customMessage">Custom Achievement Statement</label>
+            <input type="text" id="customMessage" value="for exemplary participation and successful completion with honors." />
+          </div>
+          <div class="form-group full-width">
+            <label for="recipientsInput">Recipients (One per line: "Name, email") *</label>
+            <textarea id="recipientsInput" rows="5" required>Alice Johnson, alice.j@example.com
+Bob Smith, bob.smith@example.com
+Charlie Davis, charlie.d@example.com
+Diana Prince, diana.prince@example.com</textarea>
+          </div>
+        </div>
+        <button type="submit" id="submitBtn">Generate Certificates</button>
+      </form>
+    </div>
+
+    <!-- Active Job Status Tracker -->
+    <div class="card" id="jobStatusCard" style="display: none;">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h2>2. Job Execution & Status</h2>
+        <span id="jobBadge" class="badge">PENDING</span>
+      </div>
+
+      <div class="stats-row" style="margin-top: 12px;">
+        <div class="stat-box">
+          <div class="stat-number" id="statTotal">0</div>
+          <div class="stat-label">Total Recipients</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-number" id="statSuccess" style="color: var(--success);">0</div>
+          <div class="stat-label">Successful</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-number" id="statFailed" style="color: var(--error);">0</div>
+          <div class="stat-label">Failed</div>
+        </div>
+      </div>
+
+      <div class="progress-bar-container">
+        <div class="progress-bar-fill" id="progressBar"></div>
+      </div>
+      <p id="progressText" style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">0% completed</p>
+
+      <div id="zipDownloadSection" style="margin-bottom: 16px; display: none;">
+        <a id="zipDownloadBtn" href="#" class="button btn-success" style="display: inline-block; padding: 10px 18px; border-radius: 6px; color: white; text-decoration: none; font-weight: 600;">
+          📦 Download All Certificates (ZIP)
+        </a>
+      </div>
+
+      <h3>Recipient Certificates</h3>
+      <div class="recipient-preview">
+        <table>
+          <thead>
+            <tr>
+              <th>Recipient Name</th>
+              <th>Email</th>
+              <th>Code</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="recipientsTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById("certForm");
+    const submitBtn = document.getElementById("submitBtn");
+    const jobStatusCard = document.getElementById("jobStatusCard");
+    const jobBadge = document.getElementById("jobBadge");
+    const statTotal = document.getElementById("statTotal");
+    const statSuccess = document.getElementById("statSuccess");
+    const statFailed = document.getElementById("statFailed");
+    const progressBar = document.getElementById("progressBar");
+    const progressText = document.getElementById("progressText");
+    const zipDownloadSection = document.getElementById("zipDownloadSection");
+    const zipDownloadBtn = document.getElementById("zipDownloadBtn");
+    const tableBody = document.getElementById("recipientsTableBody");
+
+    let pollInterval = null;
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const rawLines = document.getElementById("recipientsInput").value.split("\n");
+      const recipients = [];
+      for (let line of rawLines) {
+        line = line.trim();
+        if (!line) continue;
+        const parts = line.split(",");
+        if (parts.length >= 2) {
+          recipients.push({
+            name: parts[0].trim(),
+            email: parts[1].trim()
+          });
+        }
+      }
+
+      if (recipients.length === 0) {
+        alert("Please provide at least one recipient in 'Name, email' format.");
+        return;
+      }
+
+      const payload = {
+        event_name: document.getElementById("eventName").value.trim(),
+        issue_date: document.getElementById("issueDate").value.trim() || undefined,
+        issuer_name: document.getElementById("issuerName").value.trim(),
+        issuer_title: document.getElementById("issuerTitle").value.trim() || undefined,
+        custom_message: document.getElementById("customMessage").value.trim() || undefined,
+        recipients: recipients
+      };
+
+      submitBtn.disabled = true;
+      submitBtn.innerText = "Submitting...";
+
+      try {
+        const res = await fetch("/api/certificates/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          alert("Error submitting job: " + JSON.stringify(err.detail));
+          submitBtn.disabled = false;
+          submitBtn.innerText = "Generate Certificates";
+          return;
+        }
+
+        const data = await res.json();
+        const jobId = data.job_id;
+        jobStatusCard.style.display = "block";
+        startPolling(jobId);
+      } catch (err) {
+        alert("Network error: " + err);
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Generate Certificates";
+      }
+    });
+
+    function startPolling(jobId) {
+      if (pollInterval) clearInterval(pollInterval);
+      pollInterval = setInterval(() => checkJob(jobId), 1000);
+      checkJob(jobId);
+    }
+
+    async function checkJob(jobId) {
+      try {
+        const res = await fetch(`/api/jobs/${jobId}`);
+        if (!res.ok) return;
+        const job = await res.json();
+
+        jobBadge.innerText = job.status;
+        jobBadge.className = "badge badge-" + job.status;
+
+        statTotal.innerText = job.total_recipients;
+        statSuccess.innerText = job.successful_count;
+        statFailed.innerText = job.failed_count;
+
+        progressBar.style.width = job.progress_percentage + "%";
+        progressText.innerText = `${job.progress_percentage}% completed (${job.successful_count + job.failed_count}/${job.total_recipients})`;
+
+        tableBody.innerHTML = "";
+        if (job.certificates) {
+          for (let cert of job.certificates) {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+              <td><strong>${cert.recipient_name}</strong></td>
+              <td>${cert.recipient_email}</td>
+              <td><code>${cert.certificate_code}</code></td>
+              <td><span class="badge badge-${cert.status}">${cert.status}</span></td>
+              <td>
+                ${cert.download_url 
+                  ? `<a href="${cert.download_url}" target="_blank" style="color: #1e3a8a; font-weight: 600;">Download PDF</a>` 
+                  : (cert.error_message || "-")}
+              </td>
+            `;
+            tableBody.appendChild(tr);
+          }
+        }
+
+        if (["COMPLETED", "PARTIALLY_COMPLETED"].includes(job.status)) {
+          zipDownloadSection.style.display = "block";
+          zipDownloadBtn.href = `/api/jobs/${jobId}/download-zip`;
+        }
+
+        if (["COMPLETED", "PARTIALLY_COMPLETED", "FAILED"].includes(job.status)) {
+          clearInterval(pollInterval);
+          submitBtn.disabled = false;
+          submitBtn.innerText = "Generate Certificates";
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  </script>
+</body>
+</html>
