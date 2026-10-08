@@ -1,6 +1,14 @@
 # Bulk Certificate Generator API
 
-A high-performance backend API built with **FastAPI**, **SQLAlchemy**, and **ReportLab** that accepts bulk certificate generation requests for multiple recipients, validates data, asynchronously generates elegant digital PDF certificates, tracks job execution progress, and enables single or bulk ZIP downloads.
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Render-46E3B7?style=for-the-badge&logo=render&logoColor=white)](https://bulk-certificategenerator.onrender.com/)
+[![Database](https://img.shields.io/badge/Database-Supabase%20Postgres-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com/)
+[![Framework](https://img.shields.io/badge/Framework-FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+
+A high-performance backend API and interactive dashboard built with **FastAPI**, **SQLAlchemy**, and **ReportLab** that accepts bulk certificate generation requests for multiple recipients, validates data, asynchronously generates elegant digital PDF certificates, tracks job execution progress, and enables single or bulk ZIP downloads.
+
+- 🌐 **Live Web Application**: [https://bulk-certificategenerator.onrender.com/](https://bulk-certificategenerator.onrender.com/)
+- 📖 **Interactive Swagger Docs**: [https://bulk-certificategenerator.onrender.com/docs](https://bulk-certificategenerator.onrender.com/docs)
+- 📑 **ReDoc Documentation**: [https://bulk-certificategenerator.onrender.com/redoc](https://bulk-certificategenerator.onrender.com/redoc)
 
 ---
 
@@ -24,10 +32,11 @@ A high-performance backend API built with **FastAPI**, **SQLAlchemy**, and **Rep
 | Component | Technology | Rationale |
 | :--- | :--- | :--- |
 | **Framework** | FastAPI | High async performance, automatic OpenAPI / Swagger UI docs, built-in background tasks. |
-| **Database** | SQLite + SQLAlchemy ORM | Relational schema with foreign keys, transactional integrity, portable zero-config setup (easily swapped to PostgreSQL via `DATABASE_URL`). |
+| **Database** | Supabase (PostgreSQL) / SQLite + SQLAlchemy ORM | Relational schema with foreign keys, connection pooling, transactional integrity, and cloud persistence. |
 | **Data Validation** | Pydantic v2 | Strict validation of email format, non-empty text, and length limits. |
 | **PDF Generation** | ReportLab | Fast, pure-Python vector PDF drawing without external heavy dependencies like WebKit or Chromium. |
 | **Testing** | Pytest + FastAPI TestClient | In-memory SQLite testing with full branch and status verification. |
+| **Hosting** | Render | Automated web service deployments with continuous integration from GitHub. |
 
 ---
 
